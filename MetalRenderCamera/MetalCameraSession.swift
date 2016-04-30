@@ -34,12 +34,26 @@ public protocol MetalCameraSessionDelegate {
 }
 
 /**
- A convenient hub for accessing camera data as a stream of Metal textures with corresponding timestamps.
+ * A convenient hub for accessing camera data as a stream of Metal textures with corresponding timestamps.
+ *
+ * Keep in mind that frames arrive in a hardware orientation by default, e.g. `.LandscapeRight` for the rear camera. You can set the `frameOrientation` property to override this behavior and apply auto rotation to each frame.
  */
 public final class MetalCameraSession: NSObject {
     
     // MARK: Public interface
     
+    /// Frame orienation. If you want to receive frames in orientation other than the hardware default one, set this `var` and this value will be picked up when converting next frame. Although keep in mind that any rotation comes at a performance cost.
+    public var frameOrientation: AVCaptureVideoOrientation? {
+        didSet {
+            guard let
+                frameOrientation = frameOrientation,
+                outputData = outputData
+                where outputData.connectionWithMediaType(AVMediaTypeVideo).supportsVideoOrientation
+            else { return }
+
+            outputData.connectionWithMediaType(AVMediaTypeVideo).videoOrientation = frameOrientation
+        }
+    }
     /// Requested capture device position, e.g. camera
     public let captureDevicePosition: AVCaptureDevicePosition
     /// Delegate that will be notified about state changes and new frames
