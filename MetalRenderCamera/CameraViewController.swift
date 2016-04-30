@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import MetalPerformanceShaders
 
 class CameraViewController: MTKViewController {
 
