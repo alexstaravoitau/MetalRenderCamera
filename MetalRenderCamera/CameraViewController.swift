@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CameraViewController: MTKViewController {
+internal final class CameraViewController: MTKViewController {
 
     var session: MetalCameraSession?
     
@@ -42,6 +42,10 @@ extension CameraViewController: MetalCameraSessionDelegate {
              *  In this app we are going to ignore capture session runtime errors
              */
             cameraSession.start()
+        }
+        
+        dispatch_async(dispatch_get_main_queue()) { 
+            self.title = "Metal camera: \(state)"
         }
         
         NSLog("Session changed state to \(state) with error: \((error != nil) ? error!.description : "None").")
