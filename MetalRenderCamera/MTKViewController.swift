@@ -49,27 +49,30 @@ public class MTKViewController: UIViewController {
     // MARK: - Public overrides
     
     override public func loadView() {
+        super.loadView()
         assert(device != nil, "Failed creating a default system Metal device. Please, make sure Metal is available on your hardware.")
-        initialiseMetalView()
-        initialiseRenderPipelineState()
+        initializeMetalView()
+        initializeRenderPipelineState()
     }
     
     // MARK: - Private Metal-related properties and methods
     
     /**
-     Initialises and configures the `MTKView` we use as `UIViewController`'s view.
+     initializes and configures the `MTKView` we use as `UIViewController`'s view.
      
      */
-    private func initialiseMetalView() {
-        view = MTKView(frame: UIScreen.mainScreen().bounds, device: device)
+    private func initializeMetalView() {
+        metalView = MTKView(frame: view.bounds, device: device)
         metalView.delegate = self
         metalView.framebufferOnly = true
         metalView.colorPixelFormat = .BGRA8Unorm
         metalView.contentScaleFactor = UIScreen.mainScreen().scale
+        metalView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+        view.insertSubview(metalView, atIndex: 0)
     }
     
     /// `UIViewController`'s view
-    private var metalView: MTKView { return view as! MTKView }
+    private var metalView: MTKView!
     /// Metal device
     private var device = MTLCreateSystemDefaultDevice()
     /// Metal pipeline state we use for rendering
@@ -78,9 +81,9 @@ public class MTKViewController: UIViewController {
     private let semaphore = dispatch_semaphore_create(1)
 
     /**
-     Initialises render pipeline state with a default vertex function mapping texture to the view's frame and a simple fragment function returning texture pixel's value.
+     initializes render pipeline state with a default vertex function mapping texture to the view's frame and a simple fragment function returning texture pixel's value.
      */
-    private func initialiseRenderPipelineState() {
+    private func initializeRenderPipelineState() {
         guard let
             device = device,
             library = device.newDefaultLibrary()
