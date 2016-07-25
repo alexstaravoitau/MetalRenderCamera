@@ -95,7 +95,7 @@ public enum MetalCameraSessionError: ErrorType {
         case CaptureSessionRuntimeError:
             return "AVCaptureSession runtime error."
         case FailedToCreateTextureCache:
-            return "Failed to initialise texture cache."
+            return "Failed to initialize texture cache."
         case MissingSampleBuffer:
             return "No sample buffer to convert the image from."
         case FailedToGetImageBuffer:
