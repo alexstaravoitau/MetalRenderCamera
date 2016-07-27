@@ -16,6 +16,7 @@
 		FA00A6CD1CD545F4005CF485 /* MetalCameraSessionTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00A6C71CD545F4005CF485 /* MetalCameraSessionTypes.swift */; };
 		FA00A6CE1CD545F4005CF485 /* MTKViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00A6C81CD545F4005CF485 /* MTKViewController.swift */; };
 		FA00A6CF1CD545F4005CF485 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = FA00A6C91CD545F4005CF485 /* Shaders.metal */; };
+		FABBE88B1D491220006D3416 /* MetalCameraSessionTestsDelegates.swift in Sources */ = {isa = PBXBuildFile; fileRef = FABBE8891D4911EE006D3416 /* MetalCameraSessionTestsDelegates.swift */; };
 		FABC1DE91D46296C00F0B64B /* MetalCameraCaptureDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = FABC1DE81D46296C00F0B64B /* MetalCameraCaptureDevice.swift */; };
 		FABC1DFC1D46373A00F0B64B /* MetalCameraSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FABC1DFB1D46373A00F0B64B /* MetalCameraSessionTests.swift */; };
 /* End PBXBuildFile section */
@@ -42,6 +43,7 @@
 		FA00A6C71CD545F4005CF485 /* MetalCameraSessionTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalCameraSessionTypes.swift; sourceTree = "<group>"; };
 		FA00A6C81CD545F4005CF485 /* MTKViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTKViewController.swift; sourceTree = "<group>"; };
 		FA00A6C91CD545F4005CF485 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		FABBE8891D4911EE006D3416 /* MetalCameraSessionTestsDelegates.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalCameraSessionTestsDelegates.swift; sourceTree = "<group>"; };
 		FABC1DE81D46296C00F0B64B /* MetalCameraCaptureDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalCameraCaptureDevice.swift; sourceTree = "<group>"; };
 		FABC1DF01D4636D500F0B64B /* MetalRenderCameraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MetalRenderCameraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FABC1DF41D4636D500F0B64B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 		FABC1DF11D4636D500F0B64B /* MetalRenderCameraTests */ = {
 			isa = PBXGroup;
 			children = (
+				FABBE8891D4911EE006D3416 /* MetalCameraSessionTestsDelegates.swift */,
 				FABC1DFB1D46373A00F0B64B /* MetalCameraSessionTests.swift */,
 				FABC1DF41D4636D500F0B64B /* Info.plist */,
 			);
@@ -251,6 +254,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FABBE88B1D491220006D3416 /* MetalCameraSessionTestsDelegates.swift in Sources */,
 				FABC1DFC1D46373A00F0B64B /* MetalCameraSessionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -400,7 +404,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				INFOPLIST_FILE = MetalRenderCameraTests/Info.plist;
+				INFOPLIST_FILE = MetalRenderCamera/MetalRenderCameraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.oldyellowbricks.MetalRenderCameraTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -412,7 +416,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				INFOPLIST_FILE = MetalRenderCameraTests/Info.plist;
+				INFOPLIST_FILE = MetalRenderCamera/MetalRenderCameraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.oldyellowbricks.MetalRenderCameraTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -448,6 +452,7 @@
 				FABC1DF91D4636D500F0B64B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
