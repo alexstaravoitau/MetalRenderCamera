@@ -8,7 +8,11 @@
 
 import UIKit
 import Metal
-import MetalKit
+
+#if arch(i386) || arch(x86_64)
+#else
+    import MetalKit
+#endif
 
 /**
  * A `UIViewController` that allows quick and easy rendering of Metal textures. Currently only supports textures from single-plane pixel buffers, e.g. it can only render a single RGB texture and won't be able to render multiple YCbCr textures. Although this functionality can be added by overriding `MTKViewController`'s `willRenderTexture` method.
@@ -50,7 +54,11 @@ public class MTKViewController: UIViewController {
     
     override public func loadView() {
         super.loadView()
+#if arch(i386) || arch(x86_64)
+        NSLog("Failed creating a default system Metal device, since Metal is not available on iOS Simulator.")
+#else
         assert(device != nil, "Failed creating a default system Metal device. Please, make sure Metal is available on your hardware.")
+#endif
         initializeMetalView()
         initializeRenderPipelineState()
     }
@@ -62,6 +70,8 @@ public class MTKViewController: UIViewController {
      
      */
     private func initializeMetalView() {
+#if arch(i386) || arch(x86_64)
+#else
         metalView = MTKView(frame: view.bounds, device: device)
         metalView.delegate = self
         metalView.framebufferOnly = true
@@ -69,10 +79,14 @@ public class MTKViewController: UIViewController {
         metalView.contentScaleFactor = UIScreen.mainScreen().scale
         metalView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
         view.insertSubview(metalView, atIndex: 0)
+#endif
     }
-    
+
+#if arch(i386) || arch(x86_64)
+#else
     /// `UIViewController`'s view
     private var metalView: MTKView!
+#endif
     /// Metal device
     private var device = MTLCreateSystemDefaultDevice()
     /// Metal pipeline state we use for rendering
@@ -113,6 +127,9 @@ public class MTKViewController: UIViewController {
     }
 
 }
+
+#if arch(i386) || arch(x86_64)
+#else
 
 // MARK: - MTKViewDelegate and rendering
 extension MTKViewController: MTKViewDelegate {
@@ -174,6 +191,7 @@ extension MTKViewController: MTKViewDelegate {
         commandBuffer.commit()
         
     }
-
     
 }
+
+#endif

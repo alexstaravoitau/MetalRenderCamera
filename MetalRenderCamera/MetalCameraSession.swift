@@ -7,6 +7,7 @@
 //
 
 import AVFoundation
+import Metal
 
 /**
  *  A protocol for a delegate that may be notified about the capture session events.
@@ -128,22 +129,25 @@ public final class MetalCameraSession: NSObject {
     }
 
     /// `AVFoundation` capture session object.
-    internal var captureSession = AVCaptureSession()
+    private var captureSession = AVCaptureSession()
 
-    /// Our internal wrapper for the `AVCaptureDevice`
+    /// Our internal wrapper for the `AVCaptureDevice`. Making it internal to stub during testing.
     internal var captureDevice = MetalCameraCaptureDevice()
 
     /// Dispatch queue for capture session events.
     private var captureSessionQueue = dispatch_queue_create("MetalCameraSessionQueue", DISPATCH_QUEUE_SERIAL)
-    
+
+#if arch(i386) || arch(x86_64)
+#else
     /// Texture cache we will use for converting frame images to textures
     private var textureCache: Unmanaged<CVMetalTextureCacheRef>?
-    
+#endif
+
     /// `MTLDevice` we need to initialize texture cache
     private var metalDevice = MTLCreateSystemDefaultDevice()
 
     /// Current capture input device.
-    private var inputDevice: AVCaptureDeviceInput? {
+    internal var inputDevice: AVCaptureDeviceInput? {
         didSet {
             if let oldValue = oldValue {
                 captureSession.removeInput(oldValue)
@@ -154,7 +158,7 @@ public final class MetalCameraSession: NSObject {
     }
     
     /// Current capture output data stream.
-    private var outputData: AVCaptureVideoDataOutput? {
+    internal var outputData: AVCaptureVideoDataOutput? {
         didSet {
             if let oldValue = oldValue {
                 captureSession.removeOutput(oldValue)
@@ -194,12 +198,16 @@ public final class MetalCameraSession: NSObject {
      
      */
     private func initializeTextureCache() throws {
+#if arch(i386) || arch(x86_64)
+        throw MetalCameraSessionError.FailedToCreateTextureCache
+#else
         guard let
             metalDevice = metalDevice
             where CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, metalDevice, nil, &textureCache) == kCVReturnSuccess
         else {
             throw MetalCameraSessionError.FailedToCreateTextureCache
         }
+#endif
     }
 
     /**
@@ -266,8 +274,12 @@ public final class MetalCameraSession: NSObject {
     
 }
 
+
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
 extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
+
+#if arch(i386) || arch(x86_64)
+#else
 
     /**
      Converts a sample buffer received from camera to a Metal texture
@@ -359,5 +371,7 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
              */
         }
     }
-    
+
+#endif
+
 }

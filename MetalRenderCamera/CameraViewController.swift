@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Metal
 
 internal final class CameraViewController: MTKViewController {
 
