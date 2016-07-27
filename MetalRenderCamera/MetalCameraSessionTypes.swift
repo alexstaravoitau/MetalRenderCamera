@@ -24,7 +24,6 @@ public enum MetalCameraSessionState {
     case Stopped
     case Waiting
     case Error
-
 }
 
 public enum MetalCameraPixelFormat {
@@ -46,7 +45,7 @@ public enum MetalCameraPixelFormat {
  Streaming error
  */
 public enum MetalCameraSessionError: ErrorType {
-    
+
     /**
      * Streaming errors
      *///
@@ -107,7 +106,4 @@ public enum MetalCameraSessionError: ErrorType {
 
         }
     }
-    
 }
-
-

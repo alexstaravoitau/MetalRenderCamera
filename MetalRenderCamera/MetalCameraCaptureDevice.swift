@@ -24,5 +24,4 @@ internal class MetalCameraCaptureDevice {
     internal func requestAccessForMediaType(mediaType: String!, completionHandler handler: ((Bool) -> Void)!) {
         AVCaptureDevice.requestAccessForMediaType(mediaType, completionHandler: handler)
     }
-
 }

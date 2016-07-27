@@ -87,10 +87,13 @@ public class MTKViewController: UIViewController {
     /// `UIViewController`'s view
     private var metalView: MTKView!
 #endif
+
     /// Metal device
     private var device = MTLCreateSystemDefaultDevice()
+
     /// Metal pipeline state we use for rendering
     private var renderPipelineState: MTLRenderPipelineState?
+
     /// A semaphore we use to syncronize drawing code.
     private let semaphore = dispatch_semaphore_create(1)
 
@@ -125,7 +128,6 @@ public class MTKViewController: UIViewController {
             return
         }
     }
-
 }
 
 #if arch(i386) || arch(x86_64)
@@ -189,9 +191,7 @@ extension MTKViewController: MTKViewDelegate {
         }
         commandBuffer.presentDrawable(currentDrawable)
         commandBuffer.commit()
-        
     }
-    
 }
 
 #endif

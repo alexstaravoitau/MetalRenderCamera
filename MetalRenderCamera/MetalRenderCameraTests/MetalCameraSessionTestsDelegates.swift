@@ -16,6 +16,7 @@ internal final class ErrorTrackingDelegate: MetalCameraSessionDelegate {
 
     /// Stores the camera session error, so that it's available for a test
     var error: MetalCameraSessionError?
+
     /// Expectation that is waiting for the delegate
     var expectation: XCTestExpectation?
 
@@ -34,6 +35,7 @@ internal final class StateTrackingDelegate: MetalCameraSessionDelegate {
 
     /// Stores the camera session state, so that it's available for a test
     var state: MetalCameraSessionState?
+
     /// Expectation that is waiting for the delegate
     var expectation: XCTestExpectation?
 

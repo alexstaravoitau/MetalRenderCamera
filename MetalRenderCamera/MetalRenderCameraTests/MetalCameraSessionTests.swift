@@ -97,5 +97,4 @@ class MetalCameraSessionTests: XCTestCase {
             XCTAssert(delegate.error == .RequestedHardwareNotFound, "Camera session reported a inconsistent error.")
         }
     }
-
 }

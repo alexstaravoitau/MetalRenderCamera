@@ -31,7 +31,6 @@ public protocol MetalCameraSessionDelegate {
      - parameter error:          Capture session error or `nil`
      */
     func metalCameraSession(session: MetalCameraSession, didUpdateState: MetalCameraSessionState, error: MetalCameraSessionError?)
-    
 }
 
 /**
@@ -57,8 +56,10 @@ public final class MetalCameraSession: NSObject {
     }
     /// Requested capture device position, e.g. camera
     public let captureDevicePosition: AVCaptureDevicePosition
+
     /// Delegate that will be notified about state changes and new frames
     public var delegate: MetalCameraSessionDelegate?
+
     /// Pixel format to be used for grabbing camera data and converting textures
     public let pixelFormat: MetalCameraPixelFormat
     
@@ -94,7 +95,6 @@ public final class MetalCameraSession: NSObject {
                 try self.initializeTextureCache()
                 self.captureSession.startRunning()
                 self.state = .Streaming
-
             }
             catch let error as MetalCameraSessionError {
                 self.handleError(error)
@@ -271,9 +271,7 @@ public final class MetalCameraSession: NSObject {
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
-    
 }
-
 
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
 extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {

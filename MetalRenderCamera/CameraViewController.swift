@@ -27,6 +27,7 @@ internal final class CameraViewController: MTKViewController {
         super.viewDidDisappear(animated)
         session?.stop()
     }
+
 }
 
 // MARK: - MetalCameraSessionDelegate
@@ -51,5 +52,5 @@ extension CameraViewController: MetalCameraSessionDelegate {
         
         NSLog("Session changed state to \(state) with error: \((error != nil) ? error!.description : "None").")
     }
-}
 
+}
