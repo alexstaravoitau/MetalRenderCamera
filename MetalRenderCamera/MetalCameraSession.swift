@@ -219,7 +219,7 @@ public final class MetalCameraSession: NSObject {
     fileprivate func initializeInputDevice() throws {
         var captureInput: AVCaptureDeviceInput!
 
-        guard let inputDevice = captureDevice.deviceWithMediaType(AVMediaTypeVideo, position: captureDevicePosition) else {
+        guard let inputDevice = captureDevice.device(mediaType: AVMediaTypeVideo, position: captureDevicePosition) else {
             throw MetalCameraSessionError.requestedHardwareNotFound
         }
 
