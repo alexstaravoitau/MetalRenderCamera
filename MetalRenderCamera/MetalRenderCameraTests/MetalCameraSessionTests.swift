@@ -19,25 +19,25 @@ class MetalCameraSessionTests: XCTestCase {
     func testErrorWithoutDeviceAccess() {
         /// A class faking `MetalCameraCaptureDevice` that would mock access requests and devices availability
         class StubCaptureDevice: MetalCameraCaptureDevice {
-            override func requestAccessForMediaType(mediaType: String!, completionHandler handler: ((Bool) -> Void)!) { handler(false) }
+            override func requestAccessForMediaType(_ mediaType: String!, completionHandler handler: ((Bool) -> Void)!) { handler(false) }
         }
 
         let delegate = ErrorTrackingDelegate()
         let session = MetalCameraSession(delegate: delegate)
-        let expectation = expectationWithDescription("MetalCameraSession calls delegate with an updated state and error.")
+        let expectation = self.expectation(description: "MetalCameraSession calls delegate with an updated state and error.")
         delegate.expectation = expectation
         session.captureDevice = StubCaptureDevice()
         session.start()
 
-        waitForExpectationsWithTimeout(1) { error in
+        waitForExpectations(timeout: 1) { error in
             if let error = error {
                 /**
                  Apparently the error was never reported and the expectation timed out.
                  */
-                XCTFail(error.description)
+                XCTFail(error.localizedDescription)
             }
 
-            XCTAssert(delegate.error == .NoHardwareAccess, "Camera session reported a inconsistent error.")
+            XCTAssert(delegate.error == .noHardwareAccess, "Camera session reported a inconsistent error.")
         }
     }
 
@@ -47,25 +47,25 @@ class MetalCameraSessionTests: XCTestCase {
     func testStateWithDeviceAccess() {
         /// A class faking `MetalCameraCaptureDevice` that would mock access requests and devices availability
         class StubCaptureDevice: MetalCameraCaptureDevice {
-            override func requestAccessForMediaType(mediaType: String!, completionHandler handler: ((Bool) -> Void)!) { handler(true) }
+            override func requestAccessForMediaType(_ mediaType: String!, completionHandler handler: ((Bool) -> Void)!) { handler(true) }
         }
 
         let delegate = StateTrackingDelegate()
         let session = MetalCameraSession(delegate: delegate)
-        let expectation = expectationWithDescription("MetalCameraSession calls delegate with an updated state and error.")
+        let expectation = self.expectation(description: "MetalCameraSession calls delegate with an updated state and error.")
         delegate.expectation = expectation
         session.captureDevice = StubCaptureDevice()
         session.start()
 
-        waitForExpectationsWithTimeout(1) { error in
+        waitForExpectations(timeout: 1) { error in
             if let error = error {
                 /**
                  Apparently the status was never reported and the expectation timed out.
                  */
-                XCTFail(error.description)
+                XCTFail(error.localizedDescription)
             }
 
-            XCTAssert(delegate.state == .Ready)
+            XCTAssert(delegate.state == .ready)
         }
     }
 
@@ -75,26 +75,26 @@ class MetalCameraSessionTests: XCTestCase {
     func testErrorWithNoHardwareAvailable() {
         /// A class faking `MetalCameraCaptureDevice` that would mock access requests and devices availability
         class StubCaptureDevice: MetalCameraCaptureDevice {
-            override func requestAccessForMediaType(mediaType: String!, completionHandler handler: ((Bool) -> Void)!) { handler(true) }
-            override func deviceWithMediaType(mediaType: String, position: AVCaptureDevicePosition) -> AVCaptureDevice? { return nil }
+            override func requestAccessForMediaType(_ mediaType: String!, completionHandler handler: ((Bool) -> Void)!) { handler(true) }
+            override func deviceWithMediaType(_ mediaType: String, position: AVCaptureDevicePosition) -> AVCaptureDevice? { return nil }
         }
 
         let delegate = ErrorTrackingDelegate()
         let session = MetalCameraSession(delegate: delegate)
-        let expectation = expectationWithDescription("MetalCameraSession calls delegate with an updated state and error.")
+        let expectation = self.expectation(description: "MetalCameraSession calls delegate with an updated state and error.")
         delegate.expectation = expectation
         session.captureDevice = StubCaptureDevice()
         session.start()
 
-        waitForExpectationsWithTimeout(1) { error in
+        waitForExpectations(timeout: 1) { error in
             if let error = error {
                 /**
                  Apparently the error was never reported and the expectation timed out.
                  */
-                XCTFail(error.description)
+                XCTFail(error.localizedDescription)
             }
 
-            XCTAssert(delegate.error == .RequestedHardwareNotFound, "Camera session reported a inconsistent error.")
+            XCTAssert(delegate.error == .requestedHardwareNotFound, "Camera session reported a inconsistent error.")
         }
     }
 }

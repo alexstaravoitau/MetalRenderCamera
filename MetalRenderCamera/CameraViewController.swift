@@ -18,12 +18,12 @@ internal final class CameraViewController: MTKViewController {
         session = MetalCameraSession(delegate: self)
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         session?.start()
     }
 
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         session?.stop()
     }
@@ -33,24 +33,24 @@ internal final class CameraViewController: MTKViewController {
 // MARK: - MetalCameraSessionDelegate
 extension CameraViewController: MetalCameraSessionDelegate {
     
-    func metalCameraSession(session: MetalCameraSession, didReceiveFrameAsTextures textures: [MTLTexture], withTimestamp timestamp: Double) {
+    func metalCameraSession(_ session: MetalCameraSession, didReceiveFrameAsTextures textures: [MTLTexture], withTimestamp timestamp: Double) {
         self.texture = textures[0]
     }
     
-    func metalCameraSession(cameraSession: MetalCameraSession, didUpdateState state: MetalCameraSessionState, error: MetalCameraSessionError?) {
+    func metalCameraSession(_ cameraSession: MetalCameraSession, didUpdateState state: MetalCameraSessionState, error: MetalCameraSessionError?) {
         
-        if error == .CaptureSessionRuntimeError {
+        if error == .captureSessionRuntimeError {
             /**
              *  In this app we are going to ignore capture session runtime errors
              */
             cameraSession.start()
         }
         
-        dispatch_async(dispatch_get_main_queue()) { 
+        DispatchQueue.main.async { 
             self.title = "Metal camera: \(state)"
         }
         
-        NSLog("Session changed state to \(state) with error: \((error != nil) ? error!.description : "None").")
+        NSLog("Session changed state to \(state) with error: \(error?.localizedDescription ?? "None").")
     }
 
 }

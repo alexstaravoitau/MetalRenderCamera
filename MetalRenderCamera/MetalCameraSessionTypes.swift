@@ -19,23 +19,23 @@ import AVFoundation
  */
 public enum MetalCameraSessionState {
     
-    case Ready
-    case Streaming
-    case Stopped
-    case Waiting
-    case Error
+    case ready
+    case streaming
+    case stopped
+    case waiting
+    case error
 }
 
 public enum MetalCameraPixelFormat {
     
-    case RGB
-    case YCbCr
+    case rgb
+    case yCbCr
     
     var coreVideoType: OSType {
         switch self {
-        case RGB:
+        case .rgb:
             return kCVPixelFormatType_32BGRA
-        case YCbCr:
+        case .yCbCr:
             return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
         }
     }
@@ -44,26 +44,26 @@ public enum MetalCameraPixelFormat {
 /**
  Streaming error
  */
-public enum MetalCameraSessionError: ErrorType {
+public enum MetalCameraSessionError: Error {
 
     /**
      * Streaming errors
      *///
-    case NoHardwareAccess
-    case FailedToAddCaptureInputDevice
-    case FailedToAddCaptureOutput
-    case RequestedHardwareNotFound
-    case InputDeviceNotAvailable
-    case CaptureSessionRuntimeError
+    case noHardwareAccess
+    case failedToAddCaptureInputDevice
+    case failedToAddCaptureOutput
+    case requestedHardwareNotFound
+    case inputDeviceNotAvailable
+    case captureSessionRuntimeError
     
     /**
      * Conversion errors
      *///
-    case FailedToCreateTextureCache
-    case MissingSampleBuffer
-    case FailedToGetImageBuffer
-    case FailedToCreateTextureFromImage
-    case FailedToRetrieveTimestamp
+    case failedToCreateTextureCache
+    case missingSampleBuffer
+    case failedToGetImageBuffer
+    case failedToCreateTextureFromImage
+    case failedToRetrieveTimestamp
     
     /**
      Indicates if the error is related to streaming the media.
@@ -72,38 +72,37 @@ public enum MetalCameraSessionError: ErrorType {
      */
     public func isStreamingError() -> Bool {
         switch self {
-        case NoHardwareAccess, FailedToAddCaptureInputDevice, FailedToAddCaptureOutput, RequestedHardwareNotFound, InputDeviceNotAvailable, CaptureSessionRuntimeError:
+        case .noHardwareAccess, .failedToAddCaptureInputDevice, .failedToAddCaptureOutput, .requestedHardwareNotFound, .inputDeviceNotAvailable, .captureSessionRuntimeError:
             return true
         default:
             return false
         }
     }
     
-    public var description: String {
+    public var localizedDescription: String {
         switch self {
-        case NoHardwareAccess:
+        case .noHardwareAccess:
             return "Failed to get access to the hardware for a given media type."
-        case FailedToAddCaptureInputDevice:
+        case .failedToAddCaptureInputDevice:
             return "Failed to add a capture input device to the capture session."
-        case FailedToAddCaptureOutput:
+        case .failedToAddCaptureOutput:
             return "Failed to add a capture output data channel to the capture session."
-        case RequestedHardwareNotFound:
+        case .requestedHardwareNotFound:
             return "Specified hardware is not available on this device."
-        case InputDeviceNotAvailable:
+        case .inputDeviceNotAvailable:
             return "Capture input device cannot be opened, probably because it is no longer available or because it is in use."
-        case CaptureSessionRuntimeError:
+        case .captureSessionRuntimeError:
             return "AVCaptureSession runtime error."
-        case FailedToCreateTextureCache:
+        case .failedToCreateTextureCache:
             return "Failed to initialize texture cache."
-        case MissingSampleBuffer:
+        case .missingSampleBuffer:
             return "No sample buffer to convert the image from."
-        case FailedToGetImageBuffer:
+        case .failedToGetImageBuffer:
             return "Failed to retrieve an image buffer from camera's output sample buffer."
-        case FailedToCreateTextureFromImage:
+        case .failedToCreateTextureFromImage:
             return "Failed to convert the frame to a Metal texture."
-        case FailedToRetrieveTimestamp:
+        case .failedToRetrieveTimestamp:
             return "Failed to retrieve timestamp from the sample buffer."
-
         }
     }
 }

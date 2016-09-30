@@ -20,10 +20,10 @@ internal final class ErrorTrackingDelegate: MetalCameraSessionDelegate {
     /// Expectation that is waiting for the delegate
     var expectation: XCTestExpectation?
 
-    internal func metalCameraSession(session: MetalCameraSession, didReceiveFrameAsTextures: [MTLTexture], withTimestamp: Double) { }
+    internal func metalCameraSession(_ session: MetalCameraSession, didReceiveFrameAsTextures: [MTLTexture], withTimestamp: Double) { }
 
-    internal func metalCameraSession(session: MetalCameraSession, didUpdateState: MetalCameraSessionState, error newError: MetalCameraSessionError?) {
-        guard let expectation = expectation where (error == nil && newError != nil) else { return }
+    internal func metalCameraSession(_ session: MetalCameraSession, didUpdateState: MetalCameraSessionState, error newError: MetalCameraSessionError?) {
+        guard let expectation = expectation, (error == nil && newError != nil) else { return }
 
         error = newError
         expectation.fulfill()
@@ -39,10 +39,10 @@ internal final class StateTrackingDelegate: MetalCameraSessionDelegate {
     /// Expectation that is waiting for the delegate
     var expectation: XCTestExpectation?
 
-    internal func metalCameraSession(session: MetalCameraSession, didReceiveFrameAsTextures: [MTLTexture], withTimestamp: Double) { }
+    internal func metalCameraSession(_ session: MetalCameraSession, didReceiveFrameAsTextures: [MTLTexture], withTimestamp: Double) { }
 
-    internal func metalCameraSession(session: MetalCameraSession, didUpdateState newState: MetalCameraSessionState, error: MetalCameraSessionError?) {
-        guard let expectation = expectation where state == nil else { return }
+    internal func metalCameraSession(_ session: MetalCameraSession, didUpdateState newState: MetalCameraSessionState, error: MetalCameraSessionError?) {
+        guard let expectation = expectation, state == nil else { return }
 
         state = newState
         expectation.fulfill()

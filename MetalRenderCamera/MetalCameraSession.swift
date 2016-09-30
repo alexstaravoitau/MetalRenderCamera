@@ -21,7 +21,7 @@ public protocol MetalCameraSessionDelegate {
      - parameter didReceiveFrameAsTextures: Frame converted to an array of Metal textures
      - parameter withTimestamp:             Frame timestamp in seconds
      */
-    func metalCameraSession(session: MetalCameraSession, didReceiveFrameAsTextures: [MTLTexture], withTimestamp: Double)
+    func metalCameraSession(_ session: MetalCameraSession, didReceiveFrameAsTextures: [MTLTexture], withTimestamp: Double)
     
     /**
      Camera session did update capture state
@@ -30,7 +30,7 @@ public protocol MetalCameraSessionDelegate {
      - parameter didUpdateState: Capture session state
      - parameter error:          Capture session error or `nil`
      */
-    func metalCameraSession(session: MetalCameraSession, didUpdateState: MetalCameraSessionState, error: MetalCameraSessionError?)
+    func metalCameraSession(_ session: MetalCameraSession, didUpdateState: MetalCameraSessionState, error: MetalCameraSessionError?)
 }
 
 /**
@@ -45,13 +45,13 @@ public final class MetalCameraSession: NSObject {
     /// Frame orienation. If you want to receive frames in orientation other than the hardware default one, set this `var` and this value will be picked up when converting next frame. Although keep in mind that any rotation comes at a performance cost.
     public var frameOrientation: AVCaptureVideoOrientation? {
         didSet {
-            guard let
-                frameOrientation = frameOrientation,
-                outputData = outputData
-                where outputData.connectionWithMediaType(AVMediaTypeVideo).supportsVideoOrientation
+            guard
+                let frameOrientation = frameOrientation,
+                let outputData = outputData,
+                outputData.connection(withMediaType: AVMediaTypeVideo).isVideoOrientationSupported
             else { return }
 
-            outputData.connectionWithMediaType(AVMediaTypeVideo).videoOrientation = frameOrientation
+            outputData.connection(withMediaType: AVMediaTypeVideo).videoOrientation = frameOrientation
         }
     }
     /// Requested capture device position, e.g. camera
@@ -71,13 +71,13 @@ public final class MetalCameraSession: NSObject {
      - parameter delegate:              Delegate. Defaults to `nil`.
      
      */
-    public init(pixelFormat: MetalCameraPixelFormat = .RGB, captureDevicePosition: AVCaptureDevicePosition = .Back, delegate: MetalCameraSessionDelegate? = nil) {
+    public init(pixelFormat: MetalCameraPixelFormat = .rgb, captureDevicePosition: AVCaptureDevicePosition = .back, delegate: MetalCameraSessionDelegate? = nil) {
         self.pixelFormat = pixelFormat
         self.captureDevicePosition = captureDevicePosition
         self.delegate = delegate
         super.init();
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector(captureSessionRuntimeError()), name: AVCaptureSessionRuntimeErrorNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(captureSessionRuntimeError), name: NSNotification.Name.AVCaptureSessionRuntimeError, object: nil)
     }
     
     /**
@@ -86,7 +86,7 @@ public final class MetalCameraSession: NSObject {
     public func start() {
         requestCameraAccess()
 
-        dispatch_async(captureSessionQueue, {
+        captureSessionQueue.async(execute: {
             do {
                 self.captureSession.beginConfiguration()
                 try self.initializeInputDevice()
@@ -94,7 +94,7 @@ public final class MetalCameraSession: NSObject {
                 self.captureSession.commitConfiguration()
                 try self.initializeTextureCache()
                 self.captureSession.startRunning()
-                self.state = .Streaming
+                self.state = .streaming
             }
             catch let error as MetalCameraSessionError {
                 self.handleError(error)
@@ -111,40 +111,40 @@ public final class MetalCameraSession: NSObject {
      Stops the capture session.
      */
     public func stop() {
-        dispatch_async(captureSessionQueue, {
+        captureSessionQueue.async(execute: {
             self.captureSession.stopRunning()
-            self.state = .Stopped
+            self.state = .stopped
         })
     }
     
     // MARK: Private properties and methods
     
     /// Current session state.
-    private var state: MetalCameraSessionState = .Waiting {
+    fileprivate var state: MetalCameraSessionState = .waiting {
         didSet {
-            guard state != .Error else { return }
+            guard state != .error else { return }
             
             delegate?.metalCameraSession(self, didUpdateState: state, error: nil)
         }
     }
 
     /// `AVFoundation` capture session object.
-    private var captureSession = AVCaptureSession()
+    fileprivate var captureSession = AVCaptureSession()
 
     /// Our internal wrapper for the `AVCaptureDevice`. Making it internal to stub during testing.
     internal var captureDevice = MetalCameraCaptureDevice()
 
     /// Dispatch queue for capture session events.
-    private var captureSessionQueue = dispatch_queue_create("MetalCameraSessionQueue", DISPATCH_QUEUE_SERIAL)
+    fileprivate var captureSessionQueue = DispatchQueue(label: "MetalCameraSessionQueue", attributes: [])
 
 #if arch(i386) || arch(x86_64)
 #else
     /// Texture cache we will use for converting frame images to textures
-    private var textureCache: Unmanaged<CVMetalTextureCacheRef>?
+    internal var textureCache: CVMetalTextureCache?
 #endif
 
     /// `MTLDevice` we need to initialize texture cache
-    private var metalDevice = MTLCreateSystemDefaultDevice()
+    fileprivate var metalDevice = MTLCreateSystemDefaultDevice()
 
     /// Current capture input device.
     internal var inputDevice: AVCaptureDeviceInput? {
@@ -171,23 +171,23 @@ public final class MetalCameraSession: NSObject {
     /**
      Requests access to camera hardware.
      */
-    private func requestCameraAccess() {
+    fileprivate func requestCameraAccess() {
         captureDevice.requestAccessForMediaType(AVMediaTypeVideo) {
             (granted: Bool) -> Void in
             guard granted else {
-                self.handleError(.NoHardwareAccess)
+                self.handleError(.noHardwareAccess)
                 return
             }
             
-            if self.state != .Streaming && self.state != .Error {
-                self.state = .Ready
+            if self.state != .streaming && self.state != .error {
+                self.state = .ready
             }
         }
     }
     
-    private func handleError(error: MetalCameraSessionError) {
+    fileprivate func handleError(_ error: MetalCameraSessionError) {
         if error.isStreamingError() {
-            state = .Error
+            state = .error
         }
 
         delegate?.metalCameraSession(self, didUpdateState: state, error: error)
@@ -197,15 +197,15 @@ public final class MetalCameraSession: NSObject {
      initialized the texture cache. We use it to convert frames into textures.
      
      */
-    private func initializeTextureCache() throws {
+    fileprivate func initializeTextureCache() throws {
 #if arch(i386) || arch(x86_64)
-        throw MetalCameraSessionError.FailedToCreateTextureCache
+        throw MetalCameraSessionError.failedToCreateTextureCache
 #else
-        guard let
-            metalDevice = metalDevice
-            where CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, metalDevice, nil, &textureCache) == kCVReturnSuccess
+        guard
+            let metalDevice = metalDevice,
+            CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, metalDevice, nil, &textureCache) == kCVReturnSuccess
         else {
-            throw MetalCameraSessionError.FailedToCreateTextureCache
+            throw MetalCameraSessionError.failedToCreateTextureCache
         }
 #endif
     }
@@ -216,22 +216,22 @@ public final class MetalCameraSession: NSObject {
      - throws: `MetalCameraSessionError` if we failed to initialize and add input device.
      
      */
-    private func initializeInputDevice() throws {
+    fileprivate func initializeInputDevice() throws {
         var captureInput: AVCaptureDeviceInput!
 
         guard let inputDevice = captureDevice.deviceWithMediaType(AVMediaTypeVideo, position: captureDevicePosition) else {
-            throw MetalCameraSessionError.RequestedHardwareNotFound
+            throw MetalCameraSessionError.requestedHardwareNotFound
         }
 
         do {
             captureInput = try AVCaptureDeviceInput(device: inputDevice)
         }
         catch {
-            throw MetalCameraSessionError.InputDeviceNotAvailable
+            throw MetalCameraSessionError.inputDeviceNotAvailable
         }
         
         guard captureSession.canAddInput(captureInput) else {
-            throw MetalCameraSessionError.FailedToAddCaptureInputDevice
+            throw MetalCameraSessionError.failedToAddCaptureInputDevice
         }
         
         self.inputDevice = captureInput
@@ -243,17 +243,17 @@ public final class MetalCameraSession: NSObject {
      - throws: `MetalCameraSessionError` if we failed to initialize and add output data stream.
      
      */
-    private func initializeOutputData() throws {
+    fileprivate func initializeOutputData() throws {
         let outputData = AVCaptureVideoDataOutput()
 
         outputData.videoSettings = [
-            kCVPixelBufferPixelFormatTypeKey : Int(pixelFormat.coreVideoType)
+            kCVPixelBufferPixelFormatTypeKey as AnyHashable : Int(pixelFormat.coreVideoType)
         ]
         outputData.alwaysDiscardsLateVideoFrames = true
         outputData.setSampleBufferDelegate(self, queue: captureSessionQueue)
         
         guard captureSession.canAddOutput(outputData) else {
-            throw MetalCameraSessionError.FailedToAddCaptureOutput
+            throw MetalCameraSessionError.failedToAddCaptureOutput
         }
         
         self.outputData = outputData
@@ -262,14 +262,15 @@ public final class MetalCameraSession: NSObject {
     /**
      `AVCaptureSessionRuntimeErrorNotification` callback.
      */
-    private func captureSessionRuntimeError() {
-        if state == .Streaming {
-            handleError(.CaptureSessionRuntimeError)
+    @objc
+    fileprivate func captureSessionRuntimeError() {
+        if state == .streaming {
+            handleError(.captureSessionRuntimeError)
         }
     }
     
     deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
@@ -289,35 +290,33 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
      
      - returns: Metal texture or nil
      */
-    private func textureWithSampleBuffer(sampleBuffer: CMSampleBuffer?, textureCache: Unmanaged<CVMetalTextureCacheRef>?, planeIndex: Int = 0, pixelFormat: MTLPixelFormat = .BGRA8Unorm) throws -> MTLTexture {
+    private func texture(sampleBuffer: CMSampleBuffer?, textureCache: CVMetalTextureCache?, planeIndex: Int = 0, pixelFormat: MTLPixelFormat = .bgra8Unorm) throws -> MTLTexture {
         guard let sampleBuffer = sampleBuffer else {
-            throw MetalCameraSessionError.MissingSampleBuffer
+            throw MetalCameraSessionError.missingSampleBuffer
         }
         guard let textureCache = textureCache else {
-            throw MetalCameraSessionError.FailedToCreateTextureCache
+            throw MetalCameraSessionError.failedToCreateTextureCache
         }
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            throw MetalCameraSessionError.FailedToGetImageBuffer
+            throw MetalCameraSessionError.failedToGetImageBuffer
         }
         
         let isPlanar = CVPixelBufferIsPlanar(imageBuffer)
         let width = isPlanar ? CVPixelBufferGetWidthOfPlane(imageBuffer, planeIndex) : CVPixelBufferGetWidth(imageBuffer)
         let height = isPlanar ? CVPixelBufferGetHeightOfPlane(imageBuffer, planeIndex) : CVPixelBufferGetHeight(imageBuffer)
         
-        var textureRef: Unmanaged<CVMetalTextureRef>?
+        var imageTexture: CVMetalTexture?
         
-        let result = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache.takeUnretainedValue(), imageBuffer, nil, pixelFormat, width, height, planeIndex, &textureRef)
+        let result = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, imageBuffer, nil, pixelFormat, width, height, planeIndex, &imageTexture)
 
-        guard let
-            unwrappedTextureRef = textureRef,
-            texture = CVMetalTextureGetTexture(unwrappedTextureRef.takeUnretainedValue())
-            where result == kCVReturnSuccess
+        guard
+            let unwrappedImageTexture = imageTexture,
+            let texture = CVMetalTextureGetTexture(unwrappedImageTexture),
+            result == kCVReturnSuccess
         else {
-            throw MetalCameraSessionError.FailedToCreateTextureFromImage
+            throw MetalCameraSessionError.failedToCreateTextureFromImage
         }
-        
-        unwrappedTextureRef.release()
-        
+
         return texture
     }
     
@@ -328,35 +327,35 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
      
      - returns: Double value for a timestamp in seconds or nil
      */
-    private func timestampWithSampleBuffer(sampleBuffer: CMSampleBuffer?) throws -> Double {
+    private func timestamp(sampleBuffer: CMSampleBuffer?) throws -> Double {
         guard let sampleBuffer = sampleBuffer else {
-            throw MetalCameraSessionError.MissingSampleBuffer
+            throw MetalCameraSessionError.missingSampleBuffer
         }
         
         let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         
         guard time != kCMTimeInvalid else {
-            throw MetalCameraSessionError.FailedToRetrieveTimestamp
+            throw MetalCameraSessionError.failedToRetrieveTimestamp
         }
         
         return (Double)(time.value) / (Double)(time.timescale);
     }
     
-    @objc public func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
+    @objc public func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
         do {
             var textures: [MTLTexture]!
             
             switch pixelFormat {
-            case .RGB:
-                let textureRGB = try textureWithSampleBuffer(sampleBuffer, textureCache: textureCache)
+            case .rgb:
+                let textureRGB = try texture(sampleBuffer: sampleBuffer, textureCache: textureCache)
                 textures = [textureRGB]
-            case .YCbCr:
-                let textureY = try textureWithSampleBuffer(sampleBuffer, textureCache: textureCache, planeIndex: 0, pixelFormat: .R8Unorm)
-                let textureCbCr = try textureWithSampleBuffer(sampleBuffer, textureCache: textureCache, planeIndex: 1, pixelFormat: .RG8Unorm)
+            case .yCbCr:
+                let textureY = try texture(sampleBuffer: sampleBuffer, textureCache: textureCache, planeIndex: 0, pixelFormat: .r8Unorm)
+                let textureCbCr = try texture(sampleBuffer: sampleBuffer, textureCache: textureCache, planeIndex: 1, pixelFormat: .rg8Unorm)
                 textures = [textureY, textureCbCr]
             }
             
-            let timestamp = try timestampWithSampleBuffer(sampleBuffer)
+            let timestamp = try self.timestamp(sampleBuffer: sampleBuffer)
             
             delegate?.metalCameraSession(self, didReceiveFrameAsTextures: textures, withTimestamp: timestamp)
         }
