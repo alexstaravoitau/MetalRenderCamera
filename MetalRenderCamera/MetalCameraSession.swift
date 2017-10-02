@@ -153,6 +153,8 @@ public final class MetalCameraSession: NSObject {
                 captureSession.removeInput(oldValue)
             }
 
+            guard let inputDevice = inputDevice else { return }
+
             captureSession.addInput(inputDevice)
         }
     }
@@ -163,6 +165,8 @@ public final class MetalCameraSession: NSObject {
             if let oldValue = oldValue {
                 captureSession.removeOutput(oldValue)
             }
+
+            guard let outputData = outputData else { return }
             
             captureSession.addOutput(outputData)
         }
