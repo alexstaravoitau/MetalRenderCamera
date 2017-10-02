@@ -18,7 +18,6 @@ import Metal
  * A `UIViewController` that allows quick and easy rendering of Metal textures. Currently only supports textures from single-plane pixel buffers, e.g. it can only render a single RGB texture and won't be able to render multiple YCbCr textures. Although this functionality can be added by overriding `MTKViewController`'s `willRenderTexture` method.
  */
 open class MTKViewController: UIViewController {
-
     // MARK: - Public interface
     
     /// Metal texture to be drawn whenever the view controller is asked to render its view. Please note that if you set this `var` too frequently some of the textures may not being drawn, as setting a texture does not force the view controller's view to render its content.
@@ -103,7 +102,7 @@ open class MTKViewController: UIViewController {
     fileprivate func initializeRenderPipelineState() {
         guard
             let device = device,
-            let library = device.newDefaultLibrary()
+            let library = device.makeDefaultLibrary()
         else { return }
         
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
@@ -135,7 +134,6 @@ open class MTKViewController: UIViewController {
 
 // MARK: - MTKViewDelegate and rendering
 extension MTKViewController: MTKViewDelegate {
-
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         NSLog("MTKView drawable size will change to \(size)")
     }
@@ -146,13 +144,12 @@ extension MTKViewController: MTKViewDelegate {
         autoreleasepool {
             guard
                 var texture = texture,
-                let device = device
+                let device = device,
+                let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
             else {
                 _ = semaphore.signal()
                 return
             }
-            
-            let commandBuffer = device.makeCommandQueue().makeCommandBuffer()
 
             willRenderTexture(&texture, withCommandBuffer: commandBuffer, device: device)
             render(texture: texture, withCommandBuffer: commandBuffer, device: device)
@@ -169,16 +166,16 @@ extension MTKViewController: MTKViewDelegate {
         guard
             let currentRenderPassDescriptor = metalView.currentRenderPassDescriptor,
             let currentDrawable = metalView.currentDrawable,
-            let renderPipelineState = renderPipelineState
+            let renderPipelineState = renderPipelineState,
+            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
         else {
             semaphore.signal()
             return
         }
         
-        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
         encoder.pushDebugGroup("RenderFrame")
         encoder.setRenderPipelineState(renderPipelineState)
-        encoder.setFragmentTexture(texture, at: 0)
+        encoder.setFragmentTexture(texture, index: 0)
         encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: 1)
         encoder.popDebugGroup()
         encoder.endEncoding()

@@ -13,7 +13,6 @@ import Metal
  *  A protocol for a delegate that may be notified about the capture session events.
  */
 public protocol MetalCameraSessionDelegate {
-
     /**
      Camera session did receive a new frame and converted it to an array of Metal textures. For instance, if the RGB pixel format was selected, the array will have a single texture, whereas if YCbCr was selected, then there will be two textures: the Y texture at index 0, and CbCr texture at index 1 (following the order in a sample buffer).
      
@@ -39,7 +38,6 @@ public protocol MetalCameraSessionDelegate {
  * Keep in mind that frames arrive in a hardware orientation by default, e.g. `.LandscapeRight` for the rear camera. You can set the `frameOrientation` property to override this behavior and apply auto rotation to each frame.
  */
 public final class MetalCameraSession: NSObject {
-    
     // MARK: Public interface
     
     /// Frame orienation. If you want to receive frames in orientation other than the hardware default one, set this `var` and this value will be picked up when converting next frame. Although keep in mind that any rotation comes at a performance cost.
@@ -48,14 +46,15 @@ public final class MetalCameraSession: NSObject {
             guard
                 let frameOrientation = frameOrientation,
                 let outputData = outputData,
-                outputData.connection(withMediaType: AVMediaTypeVideo).isVideoOrientationSupported
+                let videoConnection = outputData.connection(with: .video),
+                videoConnection.isVideoOrientationSupported
             else { return }
 
-            outputData.connection(withMediaType: AVMediaTypeVideo).videoOrientation = frameOrientation
+            videoConnection.videoOrientation = frameOrientation
         }
     }
     /// Requested capture device position, e.g. camera
-    public let captureDevicePosition: AVCaptureDevicePosition
+    public let captureDevicePosition: AVCaptureDevice.Position
 
     /// Delegate that will be notified about state changes and new frames
     public var delegate: MetalCameraSessionDelegate?
@@ -71,7 +70,7 @@ public final class MetalCameraSession: NSObject {
      - parameter delegate:              Delegate. Defaults to `nil`.
      
      */
-    public init(pixelFormat: MetalCameraPixelFormat = .rgb, captureDevicePosition: AVCaptureDevicePosition = .back, delegate: MetalCameraSessionDelegate? = nil) {
+    public init(pixelFormat: MetalCameraPixelFormat = .rgb, captureDevicePosition: AVCaptureDevice.Position = .back, delegate: MetalCameraSessionDelegate? = nil) {
         self.pixelFormat = pixelFormat
         self.captureDevicePosition = captureDevicePosition
         self.delegate = delegate
@@ -153,6 +152,8 @@ public final class MetalCameraSession: NSObject {
                 captureSession.removeInput(oldValue)
             }
 
+            guard let inputDevice = inputDevice else { return }
+
             captureSession.addInput(inputDevice)
         }
     }
@@ -163,6 +164,8 @@ public final class MetalCameraSession: NSObject {
             if let oldValue = oldValue {
                 captureSession.removeOutput(oldValue)
             }
+
+            guard let outputData = outputData else { return }
             
             captureSession.addOutput(outputData)
         }
@@ -172,7 +175,7 @@ public final class MetalCameraSession: NSObject {
      Requests access to camera hardware.
      */
     fileprivate func requestCameraAccess() {
-        captureDevice.requestAccessForMediaType(AVMediaTypeVideo) {
+        captureDevice.requestAccess(for: .video) {
             (granted: Bool) -> Void in
             guard granted else {
                 self.handleError(.noHardwareAccess)
@@ -219,7 +222,7 @@ public final class MetalCameraSession: NSObject {
     fileprivate func initializeInputDevice() throws {
         var captureInput: AVCaptureDeviceInput!
 
-        guard let inputDevice = captureDevice.device(mediaType: AVMediaTypeVideo, position: captureDevicePosition) else {
+        guard let inputDevice = captureDevice.device(for: .video, with: captureDevicePosition) else {
             throw MetalCameraSessionError.requestedHardwareNotFound
         }
 
@@ -247,7 +250,7 @@ public final class MetalCameraSession: NSObject {
         let outputData = AVCaptureVideoDataOutput()
 
         outputData.videoSettings = [
-            kCVPixelBufferPixelFormatTypeKey as AnyHashable : Int(pixelFormat.coreVideoType)
+            kCVPixelBufferPixelFormatTypeKey as String: Int(pixelFormat.coreVideoType)
         ]
         outputData.alwaysDiscardsLateVideoFrames = true
         outputData.setSampleBufferDelegate(self, queue: captureSessionQueue)
@@ -341,7 +344,7 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
         return (Double)(time.value) / (Double)(time.timescale);
     }
     
-    @objc public func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
+    public func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         do {
             var textures: [MTLTexture]!
             
@@ -370,5 +373,5 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
 
 #endif
-
+    
 }

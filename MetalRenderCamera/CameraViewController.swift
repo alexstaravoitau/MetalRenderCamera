@@ -10,7 +10,6 @@ import UIKit
 import Metal
 
 internal final class CameraViewController: MTKViewController {
-
     var session: MetalCameraSession?
     
     override func viewDidLoad() {
@@ -27,12 +26,10 @@ internal final class CameraViewController: MTKViewController {
         super.viewDidDisappear(animated)
         session?.stop()
     }
-
 }
 
 // MARK: - MetalCameraSessionDelegate
 extension CameraViewController: MetalCameraSessionDelegate {
-    
     func metalCameraSession(_ session: MetalCameraSession, didReceiveFrameAsTextures textures: [MTLTexture], withTimestamp timestamp: Double) {
         self.texture = textures[0]
     }
@@ -52,5 +49,4 @@ extension CameraViewController: MetalCameraSessionDelegate {
         
         NSLog("Session changed state to \(state) with error: \(error?.localizedDescription ?? "None").")
     }
-
 }

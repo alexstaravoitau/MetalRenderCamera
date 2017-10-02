@@ -18,7 +18,6 @@ import AVFoundation
  - Error:     An error has occured
  */
 public enum MetalCameraSessionState {
-    
     case ready
     case streaming
     case stopped
@@ -27,7 +26,6 @@ public enum MetalCameraSessionState {
 }
 
 public enum MetalCameraPixelFormat {
-    
     case rgb
     case yCbCr
     
@@ -45,7 +43,6 @@ public enum MetalCameraPixelFormat {
  Streaming error
  */
 public enum MetalCameraSessionError: Error {
-
     /**
      * Streaming errors
      *///
@@ -82,27 +79,27 @@ public enum MetalCameraSessionError: Error {
     public var localizedDescription: String {
         switch self {
         case .noHardwareAccess:
-            return "Failed to get access to the hardware for a given media type."
+            return "Failed to get access to the hardware for a given media type"
         case .failedToAddCaptureInputDevice:
-            return "Failed to add a capture input device to the capture session."
+            return "Failed to add a capture input device to the capture session"
         case .failedToAddCaptureOutput:
-            return "Failed to add a capture output data channel to the capture session."
+            return "Failed to add a capture output data channel to the capture session"
         case .requestedHardwareNotFound:
-            return "Specified hardware is not available on this device."
+            return "Specified hardware is not available on this device"
         case .inputDeviceNotAvailable:
-            return "Capture input device cannot be opened, probably because it is no longer available or because it is in use."
+            return "Capture input device cannot be opened, probably because it is no longer available or because it is in use"
         case .captureSessionRuntimeError:
-            return "AVCaptureSession runtime error."
+            return "AVCaptureSession runtime error"
         case .failedToCreateTextureCache:
-            return "Failed to initialize texture cache."
+            return "Failed to initialize texture cache"
         case .missingSampleBuffer:
-            return "No sample buffer to convert the image from."
+            return "No sample buffer to convert the image from"
         case .failedToGetImageBuffer:
-            return "Failed to retrieve an image buffer from camera's output sample buffer."
+            return "Failed to retrieve an image buffer from camera's output sample buffer"
         case .failedToCreateTextureFromImage:
-            return "Failed to convert the frame to a Metal texture."
+            return "Failed to convert the frame to a Metal texture"
         case .failedToRetrieveTimestamp:
-            return "Failed to retrieve timestamp from the sample buffer."
+            return "Failed to retrieve timestamp from the sample buffer"
         }
     }
 }

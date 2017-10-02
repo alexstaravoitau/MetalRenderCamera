@@ -19,7 +19,7 @@ class MetalCameraSessionTests: XCTestCase {
     func testErrorWithoutDeviceAccess() {
         /// A class faking `MetalCameraCaptureDevice` that would mock access requests and devices availability
         class StubCaptureDevice: MetalCameraCaptureDevice {
-            override func requestAccessForMediaType(_ mediaType: String!, completionHandler handler: ((Bool) -> Void)!) { handler(false) }
+            override func requestAccess(for mediaType: AVMediaType, completionHandler handler: @escaping ((Bool) -> Void)) { handler(false) }
         }
 
         let delegate = ErrorTrackingDelegate()
@@ -47,7 +47,7 @@ class MetalCameraSessionTests: XCTestCase {
     func testStateWithDeviceAccess() {
         /// A class faking `MetalCameraCaptureDevice` that would mock access requests and devices availability
         class StubCaptureDevice: MetalCameraCaptureDevice {
-            override func requestAccessForMediaType(_ mediaType: String!, completionHandler handler: ((Bool) -> Void)!) { handler(true) }
+            override func requestAccess(for mediaType: AVMediaType, completionHandler handler: @escaping ((Bool) -> Void)) { handler(true) }
         }
 
         let delegate = StateTrackingDelegate()
@@ -75,8 +75,8 @@ class MetalCameraSessionTests: XCTestCase {
     func testErrorWithNoHardwareAvailable() {
         /// A class faking `MetalCameraCaptureDevice` that would mock access requests and devices availability
         class StubCaptureDevice: MetalCameraCaptureDevice {
-            override func requestAccessForMediaType(_ mediaType: String!, completionHandler handler: ((Bool) -> Void)!) { handler(true) }
-            override func device(mediaType: String, position: AVCaptureDevicePosition) -> AVCaptureDevice? { return nil }
+            override func requestAccess(for mediaType: AVMediaType, completionHandler handler: @escaping ((Bool) -> Void)) { handler(true) }
+            override func device(for mediaType: AVMediaType, with position: AVCaptureDevice.Position) -> AVCaptureDevice? { return nil }
         }
 
         let delegate = ErrorTrackingDelegate()
