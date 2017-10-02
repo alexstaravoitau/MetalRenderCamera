@@ -71,7 +71,7 @@ public final class MetalCameraSession: NSObject {
      - parameter delegate:              Delegate. Defaults to `nil`.
      
      */
-    public init(pixelFormat: MetalCameraPixelFormat = .rgb, captureDevicePosition: AVCaptureDevicePosition = .back, delegate: MetalCameraSessionDelegate? = nil) {
+    public init(pixelFormat: MetalCameraPixelFormat = .rgb, captureDevicePosition: AVCaptureDevice.Position = .back, delegate: MetalCameraSessionDelegate? = nil) {
         self.pixelFormat = pixelFormat
         self.captureDevicePosition = captureDevicePosition
         self.delegate = delegate
