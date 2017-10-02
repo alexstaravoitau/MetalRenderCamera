@@ -13,7 +13,6 @@ import Metal
  *  A protocol for a delegate that may be notified about the capture session events.
  */
 public protocol MetalCameraSessionDelegate {
-
     /**
      Camera session did receive a new frame and converted it to an array of Metal textures. For instance, if the RGB pixel format was selected, the array will have a single texture, whereas if YCbCr was selected, then there will be two textures: the Y texture at index 0, and CbCr texture at index 1 (following the order in a sample buffer).
      
@@ -39,7 +38,6 @@ public protocol MetalCameraSessionDelegate {
  * Keep in mind that frames arrive in a hardware orientation by default, e.g. `.LandscapeRight` for the rear camera. You can set the `frameOrientation` property to override this behavior and apply auto rotation to each frame.
  */
 public final class MetalCameraSession: NSObject {
-    
     // MARK: Public interface
     
     /// Frame orienation. If you want to receive frames in orientation other than the hardware default one, set this `var` and this value will be picked up when converting next frame. Although keep in mind that any rotation comes at a performance cost.
@@ -375,5 +373,5 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
 
 #endif
-
+    
 }

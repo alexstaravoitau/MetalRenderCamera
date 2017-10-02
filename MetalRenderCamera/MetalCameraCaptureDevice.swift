@@ -10,7 +10,6 @@ import AVFoundation
 
 /// A wrapper for the `AVFoundation`'s `AVCaptureDevice` that has instance methods instead of the class ones. This wrapper will make unit testing so much easier.
 internal class MetalCameraCaptureDevice {
-
     /**
      Attempts to get a capture device with specified media type and position.
 

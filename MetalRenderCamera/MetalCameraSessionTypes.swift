@@ -18,7 +18,6 @@ import AVFoundation
  - Error:     An error has occured
  */
 public enum MetalCameraSessionState {
-    
     case ready
     case streaming
     case stopped
@@ -27,7 +26,6 @@ public enum MetalCameraSessionState {
 }
 
 public enum MetalCameraPixelFormat {
-    
     case rgb
     case yCbCr
     
@@ -45,7 +43,6 @@ public enum MetalCameraPixelFormat {
  Streaming error
  */
 public enum MetalCameraSessionError: Error {
-
     /**
      * Streaming errors
      *///
