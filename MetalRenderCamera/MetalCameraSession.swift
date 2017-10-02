@@ -251,7 +251,7 @@ public final class MetalCameraSession: NSObject {
         let outputData = AVCaptureVideoDataOutput()
 
         outputData.videoSettings = [
-            kCVPixelBufferPixelFormatTypeKey as AnyHashable : Int(pixelFormat.coreVideoType)
+            kCVPixelBufferPixelFormatTypeKey as String: Int(pixelFormat.coreVideoType)
         ]
         outputData.alwaysDiscardsLateVideoFrames = true
         outputData.setSampleBufferDelegate(self, queue: captureSessionQueue)
