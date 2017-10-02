@@ -48,14 +48,15 @@ public final class MetalCameraSession: NSObject {
             guard
                 let frameOrientation = frameOrientation,
                 let outputData = outputData,
-                outputData.connection(withMediaType: AVMediaTypeVideo).isVideoOrientationSupported
+                let videoConnection = outputData.connection(with: .video),
+                videoConnection.isVideoOrientationSupported
             else { return }
 
-            outputData.connection(withMediaType: AVMediaTypeVideo).videoOrientation = frameOrientation
+            videoConnection.videoOrientation = frameOrientation
         }
     }
     /// Requested capture device position, e.g. camera
-    public let captureDevicePosition: AVCaptureDevicePosition
+    public let captureDevicePosition: AVCaptureDevice.Position
 
     /// Delegate that will be notified about state changes and new frames
     public var delegate: MetalCameraSessionDelegate?
@@ -176,7 +177,7 @@ public final class MetalCameraSession: NSObject {
      Requests access to camera hardware.
      */
     fileprivate func requestCameraAccess() {
-        captureDevice.requestAccessForMediaType(AVMediaTypeVideo) {
+        captureDevice.requestAccess(for: .video) {
             (granted: Bool) -> Void in
             guard granted else {
                 self.handleError(.noHardwareAccess)
@@ -223,7 +224,7 @@ public final class MetalCameraSession: NSObject {
     fileprivate func initializeInputDevice() throws {
         var captureInput: AVCaptureDeviceInput!
 
-        guard let inputDevice = captureDevice.device(mediaType: AVMediaTypeVideo, position: captureDevicePosition) else {
+        guard let inputDevice = captureDevice.device(for: .video, with: captureDevicePosition) else {
             throw MetalCameraSessionError.requestedHardwareNotFound
         }
 
@@ -345,7 +346,7 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
         return (Double)(time.value) / (Double)(time.timescale);
     }
     
-    @objc public func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
+    public func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         do {
             var textures: [MTLTexture]!
             
