@@ -15,11 +15,11 @@ internal class MetalCameraCaptureDevice {
      Attempts to get a capture device with specified media type and position.
 
      - parameter for: Device media type
-     - parameter position: Device position
+     - parameter with: Device position
 
      - returns: Capture device or `nil`.
      */
-    internal func device(for mediaType: AVMediaType, position: AVCaptureDevice.Position) -> AVCaptureDevice? {
+    internal func device(for mediaType: AVMediaType, with position: AVCaptureDevice.Position) -> AVCaptureDevice? {
         return AVCaptureDevice.devices(for: mediaType).first { $0.position == position }
     }
 
