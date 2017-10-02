@@ -103,7 +103,7 @@ open class MTKViewController: UIViewController {
     fileprivate func initializeRenderPipelineState() {
         guard
             let device = device,
-            let library = device.newDefaultLibrary()
+            let library = device.makeDefaultLibrary()
         else { return }
         
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
@@ -146,13 +146,12 @@ extension MTKViewController: MTKViewDelegate {
         autoreleasepool {
             guard
                 var texture = texture,
-                let device = device
+                let device = device,
+                let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
             else {
                 _ = semaphore.signal()
                 return
             }
-            
-            let commandBuffer = device.makeCommandQueue().makeCommandBuffer()
 
             willRenderTexture(&texture, withCommandBuffer: commandBuffer, device: device)
             render(texture: texture, withCommandBuffer: commandBuffer, device: device)
@@ -169,16 +168,16 @@ extension MTKViewController: MTKViewDelegate {
         guard
             let currentRenderPassDescriptor = metalView.currentRenderPassDescriptor,
             let currentDrawable = metalView.currentDrawable,
-            let renderPipelineState = renderPipelineState
+            let renderPipelineState = renderPipelineState,
+            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
         else {
             semaphore.signal()
             return
         }
         
-        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
         encoder.pushDebugGroup("RenderFrame")
         encoder.setRenderPipelineState(renderPipelineState)
-        encoder.setFragmentTexture(texture, at: 0)
+        encoder.setFragmentTexture(texture, index: 0)
         encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: 1)
         encoder.popDebugGroup()
         encoder.endEncoding()
