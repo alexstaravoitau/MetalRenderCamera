@@ -90,6 +90,11 @@ open class MTKViewController: UIViewController {
     /// Metal device
     internal var device = MTLCreateSystemDefaultDevice()
 
+    /// Metal device command queue
+    lazy internal var commandQueue: MTLCommandQueue? = {
+        return device?.makeCommandQueue()
+    }()
+
     /// Metal pipeline state we use for rendering
     internal var renderPipelineState: MTLRenderPipelineState?
 
@@ -145,7 +150,7 @@ extension MTKViewController: MTKViewDelegate {
             guard
                 var texture = texture,
                 let device = device,
-                let commandBuffer = device.makeCommandQueue()?.makeCommandBuffer()
+                let commandBuffer = commandQueue?.makeCommandBuffer()
             else {
                 _ = semaphore.signal()
                 return
