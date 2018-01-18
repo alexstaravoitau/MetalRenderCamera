@@ -8,6 +8,7 @@
 
 import UIKit
 import Metal
+import MetalPerformanceShaders
 
 internal final class CameraViewController: MTKViewController {
     var session: MetalCameraSession?
@@ -21,6 +22,19 @@ internal final class CameraViewController: MTKViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         session = MetalCameraSession(delegate: self)
+    }
+
+    override func willRenderTexture(_ texture: inout MTLTexture, withCommandBuffer commandBuffer: MTLCommandBuffer, device: MTLDevice) {
+        guard buttonSobel?.alpha == 1 else { return }
+
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: MTLPixelFormat.r8Unorm, width: texture.width, height: texture.height, mipmapped: false)
+        textureDescriptor.usage = .renderTarget
+
+        guard let textureWithFilter = device.makeTexture(descriptor: textureDescriptor) else { return}
+        
+        let sobel = MPSImageSobel(device: device)
+        sobel.encode(commandBuffer: commandBuffer, sourceTexture: texture, destinationTexture: textureWithFilter)
+        texture = textureWithFilter
     }
     
     override func viewWillAppear(_ animated: Bool) {
