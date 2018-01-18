@@ -11,7 +11,13 @@ import Metal
 
 internal final class CameraViewController: MTKViewController {
     var session: MetalCameraSession?
-    
+
+    @IBOutlet var buttonSobel: UIButton?
+
+    @IBAction func sobelButtonHandler(sender: AnyObject) {
+        buttonSobel?.alpha = buttonSobel?.alpha == 1 ? 0.6 : 1
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         session = MetalCameraSession(delegate: self)
