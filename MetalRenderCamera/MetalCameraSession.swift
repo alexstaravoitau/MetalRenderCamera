@@ -337,7 +337,7 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
         
         let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         
-        guard time != kCMTimeInvalid else {
+        guard time != CMTime.invalid else {
             throw MetalCameraSessionError.failedToRetrieveTimestamp
         }
         

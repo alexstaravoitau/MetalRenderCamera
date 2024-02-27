@@ -19,7 +19,8 @@ internal class MetalCameraCaptureDevice {
      - returns: Capture device or `nil`.
      */
     internal func device(for mediaType: AVMediaType, with position: AVCaptureDevice.Position) -> AVCaptureDevice? {
-        return AVCaptureDevice.devices(for: mediaType).first { $0.position == position }
+        let session = AVCaptureDevice.DiscoverySession(deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera], mediaType: mediaType, position: position);
+        return session.devices.first
     }
 
     /**
