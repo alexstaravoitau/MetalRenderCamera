@@ -35,7 +35,7 @@ extension CameraViewController: MetalCameraSessionDelegate {
     }
     
     func metalCameraSession(_ cameraSession: MetalCameraSession, didUpdateState state: MetalCameraSessionState, error: MetalCameraSessionError?) {
-        
+        cameraSession.frameOrientation = .portrait
         if error == .captureSessionRuntimeError {
             /**
              *  In this app we are going to ignore capture session runtime errors
