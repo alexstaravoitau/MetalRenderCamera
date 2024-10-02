@@ -1,8 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" initialViewController="01J-lp-oVM">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -14,48 +17,37 @@
                         <viewControllerLayoutGuide type="bottom" id="xb3-aO-Qok"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Metal Camera" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="YvR-z6-lbt">
-                                <rect key="frame" x="20" y="92.5" width="627" height="50"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="HMW-S9-5y9"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" weight="thin" pointSize="34"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="metal_icon" translatesAutoresizingMaskIntoConstraints="NO" id="eXD-Sz-ibQ">
-                                <rect key="frame" x="223" y="187" width="100" height="100"/>
-                                <color key="tintColor" red="0.76643386989999995" green="0.76643386989999995" blue="0.76643386989999995" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="100" id="Mmn-0E-ERl"/>
-                                    <constraint firstAttribute="height" constant="100" id="MoS-Sd-82n"/>
-                                </constraints>
-                            </imageView>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="camera_icon" translatesAutoresizingMaskIntoConstraints="NO" id="Qma-9s-UKq">
-                                <rect key="frame" x="343" y="187" width="100" height="100"/>
-                                <color key="tintColor" red="0.76643386989999995" green="0.76643386989999995" blue="0.76643386989999995" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="100" id="tTv-46-jf3"/>
-                                    <constraint firstAttribute="width" constant="100" id="ys2-Pk-Efr"/>
-                                </constraints>
-                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="ADv-OG-QnU">
+                                <rect key="frame" x="94.666666666666671" y="341" width="203.66666666666663" height="170"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="metal_icon" translatesAutoresizingMaskIntoConstraints="NO" id="eXD-Sz-ibQ">
+                                        <rect key="frame" x="51.999999999999986" y="0.0" width="100.00000000000001" height="100"/>
+                                        <color key="tintColor" red="0.76643386989999995" green="0.76643386989999995" blue="0.76643386989999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="100" id="Mmn-0E-ERl"/>
+                                            <constraint firstAttribute="height" constant="100" id="MoS-Sd-82n"/>
+                                        </constraints>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Metal Camera" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YvR-z6-lbt">
+                                        <rect key="frame" x="0.0" y="120" width="203.66666666666666" height="50"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="50" id="HMW-S9-5y9"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
                         </subviews>
-                        <color key="backgroundColor" red="0.96165933229352352" green="0.96165933229352352" blue="0.96165933229352352" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="YvR-z6-lbt" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" id="0Aw-7i-doq"/>
-                            <constraint firstItem="Qma-9s-UKq" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" constant="60" id="Bam-7B-gke"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="YvR-z6-lbt" secondAttribute="trailing" id="Etj-GU-5t3"/>
-                            <constraint firstItem="YvR-z6-lbt" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-70" id="P07-r0-HxV"/>
-                            <constraint firstItem="eXD-Sz-ibQ" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="50" id="RqS-aE-EKx"/>
-                            <constraint firstItem="Qma-9s-UKq" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="50" id="h90-Tq-RYT"/>
-                            <constraint firstItem="eXD-Sz-ibQ" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" constant="-60" id="k20-AX-06A"/>
+                            <constraint firstItem="ADv-OG-QnU" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="bnY-Nc-MKT"/>
+                            <constraint firstItem="ADv-OG-QnU" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="hja-U2-RMH"/>
                         </constraints>
                     </view>
-                    <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -63,7 +55,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="camera_icon" width="200" height="200"/>
         <image name="metal_icon" width="200" height="200"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
     </resources>
 </document>
