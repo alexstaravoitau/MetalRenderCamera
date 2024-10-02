@@ -76,7 +76,7 @@ class MetalCameraSessionTests: XCTestCase {
         /// A class faking `MetalCameraCaptureDevice` that would mock access requests and devices availability
         class StubCaptureDevice: MetalCameraCaptureDevice {
             override func requestAccess(for mediaType: AVMediaType, completionHandler handler: @escaping ((Bool) -> Void)) { handler(true) }
-            override func device(for mediaType: AVMediaType, with position: AVCaptureDevice.Position) -> AVCaptureDevice? { return nil }
+            override func device(for mediaType: AVMediaType, type: AVCaptureDevice.DeviceType, position: AVCaptureDevice.Position) -> AVCaptureDevice? { return nil }
         }
 
         let delegate = ErrorTrackingDelegate()

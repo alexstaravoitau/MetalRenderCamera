@@ -35,18 +35,18 @@ extension CameraViewController: MetalCameraSessionDelegate {
     }
     
     func metalCameraSession(_ cameraSession: MetalCameraSession, didUpdateState state: MetalCameraSessionState, error: MetalCameraSessionError?) {
-        
-        if error == .captureSessionRuntimeError {
-            /**
-             *  In this app we are going to ignore capture session runtime errors
-             */
+        switch state {
+        case .streaming:
+            cameraSession.frameOrientation = .portrait
+        case .error where error == .captureSessionRuntimeError:
+            // Ignoring capture session runtime errors
             cameraSession.start()
+        default:
+            break
         }
-        
         DispatchQueue.main.async { 
             self.title = "Metal camera: \(state)"
         }
-        
         NSLog("Session changed state to \(state) with error: \(error?.localizedDescription ?? "None").")
     }
 }

@@ -55,7 +55,9 @@ public final class MetalCameraSession: NSObject {
     }
     /// Requested capture device position, e.g. camera
     public let captureDevicePosition: AVCaptureDevice.Position
-
+    
+    public let captureDeviceType: AVCaptureDevice.DeviceType
+    
     /// Delegate that will be notified about state changes and new frames
     public var delegate: MetalCameraSessionDelegate?
 
@@ -70,9 +72,10 @@ public final class MetalCameraSession: NSObject {
      - parameter delegate:              Delegate. Defaults to `nil`.
      
      */
-    public init(pixelFormat: MetalCameraPixelFormat = .rgb, captureDevicePosition: AVCaptureDevice.Position = .back, delegate: MetalCameraSessionDelegate? = nil) {
+    public init(pixelFormat: MetalCameraPixelFormat = .rgb, captureDevicePosition: AVCaptureDevice.Position = .back, captureDeviceType: AVCaptureDevice.DeviceType = .builtInWideAngleCamera, delegate: MetalCameraSessionDelegate? = nil) {
         self.pixelFormat = pixelFormat
         self.captureDevicePosition = captureDevicePosition
+        self.captureDeviceType = captureDeviceType
         self.delegate = delegate
         super.init();
 
@@ -222,7 +225,7 @@ public final class MetalCameraSession: NSObject {
     fileprivate func initializeInputDevice() throws {
         var captureInput: AVCaptureDeviceInput!
 
-        guard let inputDevice = captureDevice.device(for: .video, with: captureDevicePosition) else {
+        guard let inputDevice = captureDevice.device(for: .video, type: captureDeviceType, position: captureDevicePosition) else {
             throw MetalCameraSessionError.requestedHardwareNotFound
         }
 
