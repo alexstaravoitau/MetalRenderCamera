@@ -14,7 +14,7 @@ internal final class CameraViewController: MTKViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        session = MetalCameraSession(frameRate: 30, delegate: self)
+        session = MetalCameraSession(frameOrientation: .portrait, delegate: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -36,8 +36,6 @@ extension CameraViewController: MetalCameraSessionDelegate {
     
     func metalCameraSession(_ cameraSession: MetalCameraSession, didUpdateState state: MetalCameraSessionState, error: MetalCameraSessionError?) {
         switch state {
-        case .streaming:
-            cameraSession.frameOrientation = .portrait
         case .error where error == .captureSessionRuntimeError:
             // Ignoring capture session runtime errors
             cameraSession.start()

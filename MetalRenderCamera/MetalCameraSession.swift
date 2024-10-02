@@ -35,25 +35,15 @@ public protocol MetalCameraSessionDelegate {
 /**
  * A convenient hub for accessing camera data as a stream of Metal textures with corresponding timestamps.
  *
- * Keep in mind that frames arrive in a hardware orientation by default, e.g. `.LandscapeRight` for the rear camera. You can set the `frameOrientation` property to override this behavior and apply auto rotation to each frame.
+ * Frames are received in the specified orientation set during initialization.
  */
 public final class MetalCameraSession: NSObject {
     // MARK: Public interface
     
-    /// Frame orienation. If you want to receive frames in orientation other than the hardware default one, set this `var` and this value will be picked up when converting next frame. Although keep in mind that any rotation comes at a performance cost.
-    public var frameOrientation: AVCaptureVideoOrientation? {
-        didSet {
-            guard
-                let frameOrientation = frameOrientation,
-                let outputData = outputData,
-                let videoConnection = outputData.connection(with: .video),
-                videoConnection.isVideoOrientationSupported
-            else { return }
-
-            videoConnection.videoOrientation = frameOrientation
-        }
-    }
-    /// Requested capture device position, e.g. camera
+    /// Frame orientation.
+    public let frameOrientation: AVCaptureVideoOrientation?
+    
+    /// Requested capture device position, i.e. back/front camera
     public let captureDevicePosition: AVCaptureDevice.Position
     
     /// Requested capture device type
@@ -65,27 +55,26 @@ public final class MetalCameraSession: NSObject {
     /// Pixel format to be used for grabbing camera data and converting textures
     public let pixelFormat: MetalCameraPixelFormat
     
-    public let frameRate: Int32?
-    
     /**
-     initialized a new instance, providing optional values.
+     Initializes a new instance with optional values.
      
-     - parameter pixelFormat:           Pixel format. Defaults to `.RGB`
-     - parameter captureDevicePosition: Camera to be used for capturing. Defaults to `.Back`.
+     - parameter pixelFormat:           Pixel format. Defaults to `.rgb`
+     - parameter captureDevicePosition: Camera to be used for capturing. Defaults to `.back`.
+     - parameter captureDeviceType:     Device type to be used for capturing. Defaults to `.builtInWideAngleCamera`.
+     - parameter frameOrientation:      Desired frame orientation. Defaults to `nil`.
      - parameter delegate:              Delegate. Defaults to `nil`.
-     
      */
     public init(
         pixelFormat: MetalCameraPixelFormat = .rgb,
         captureDevicePosition: AVCaptureDevice.Position = .back,
         captureDeviceType: AVCaptureDevice.DeviceType = .builtInWideAngleCamera,
-        frameRate: Int32? = nil,
+        frameOrientation: AVCaptureVideoOrientation? = nil,
         delegate: MetalCameraSessionDelegate? = nil
     ) {
         self.pixelFormat = pixelFormat
         self.captureDevicePosition = captureDevicePosition
         self.captureDeviceType = captureDeviceType
-        self.frameRate = frameRate
+        self.frameOrientation = frameOrientation
         self.delegate = delegate
         super.init()
 
@@ -112,9 +101,7 @@ public final class MetalCameraSession: NSObject {
                 self.handleError(error)
             }
             catch {
-                /**
-                 * We only throw `MetalCameraSessionError` errors.
-                 */
+                // We only throw `MetalCameraSessionError` errors.
             }
         })
     }
@@ -143,7 +130,7 @@ public final class MetalCameraSession: NSObject {
     /// `AVFoundation` capture session object.
     fileprivate var captureSession = AVCaptureSession()
 
-    /// Our internal wrapper for the `AVCaptureDevice`. Making it internal to stub during testing.
+    /// Our internal wrapper for the `AVCaptureDevice`.
     internal var captureDevice = MetalCameraCaptureDevice()
 
     /// Dispatch queue for capture session events.
@@ -188,8 +175,7 @@ public final class MetalCameraSession: NSObject {
      Requests access to camera hardware.
      */
     fileprivate func requestCameraAccess() {
-        captureDevice.requestAccess(for: .video) {
-            (granted: Bool) -> Void in
+        captureDevice.requestAccess(for: .video) { granted in
             guard granted else {
                 self.handleError(.noHardwareAccess)
                 return
@@ -210,8 +196,7 @@ public final class MetalCameraSession: NSObject {
     }
 
     /**
-     initialized the texture cache. We use it to convert frames into textures.
-     
+     Initializes the texture cache. We use it to convert frames into textures.
      */
     fileprivate func initializeTextureCache() throws {
 #if arch(i386) || arch(x86_64)
@@ -227,10 +212,9 @@ public final class MetalCameraSession: NSObject {
     }
 
     /**
-     initializes capture input device with specified media type and device position.
+     Initializes capture input device with specified media type and device position.
      
      - throws: `MetalCameraSessionError` if we failed to initialize and add input device.
-     
      */
     fileprivate func initializeInputDevice() throws {
         var captureInput: AVCaptureDeviceInput!
@@ -241,34 +225,8 @@ public final class MetalCameraSession: NSObject {
 
         do {
             captureInput = try AVCaptureDeviceInput(device: inputDevice)
-            
-            try inputDevice.lockForConfiguration()
-            
-            if let frameRate {
-                var isFrameRateSupported = false
-                for format in inputDevice.formats {
-                    let ranges = format.videoSupportedFrameRateRanges
-                    for range in ranges {
-                        if range.minFrameRate...range.maxFrameRate ~= Double(frameRate) {
-                            inputDevice.activeFormat = format
-                            inputDevice.activeVideoMinFrameDuration = CMTime(value: 1, timescale: frameRate)
-                            inputDevice.activeVideoMaxFrameDuration = CMTime(value: 1, timescale: frameRate)
-                            isFrameRateSupported = true
-                            break
-                        }
-                    }
-                    if isFrameRateSupported { break }
-                }
-                if !isFrameRateSupported {
-                    inputDevice.unlockForConfiguration()
-                    throw MetalCameraSessionError.frameRateNotSupported
-                }
-            }
-            
-            inputDevice.unlockForConfiguration()
         }
         catch {
-            inputDevice.unlockForConfiguration()
             throw MetalCameraSessionError.inputDeviceNotAvailable
         }
         
@@ -280,10 +238,9 @@ public final class MetalCameraSession: NSObject {
     }
     
     /**
-     initializes capture output data stream.
+     Initializes capture output data stream.
      
      - throws: `MetalCameraSessionError` if we failed to initialize and add output data stream.
-     
      */
     fileprivate func initializeOutputData() throws {
         let outputData = AVCaptureVideoDataOutput()
@@ -299,6 +256,14 @@ public final class MetalCameraSession: NSObject {
         }
         
         self.outputData = outputData
+
+        // Set the video orientation
+        if let frameOrientation = frameOrientation,
+           let videoConnection = outputData.connection(with: .video),
+           videoConnection.isVideoOrientationSupported
+        {
+            videoConnection.videoOrientation = frameOrientation
+        }
     }
     
     /**
@@ -328,7 +293,7 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
      - parameter sampleBuffer: Sample buffer
      - parameter textureCache: Texture cache
      - parameter planeIndex:   Index of the plane for planar buffers. Defaults to 0.
-     - parameter pixelFormat:  Metal pixel format. Defaults to `.BGRA8Unorm`.
+     - parameter pixelFormat:  Metal pixel format. Defaults to `.bgra8Unorm`.
      
      - returns: Metal texture or nil
      */
@@ -380,7 +345,7 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
             throw MetalCameraSessionError.failedToRetrieveTimestamp
         }
         
-        return (Double)(time.value) / (Double)(time.timescale);
+        return Double(time.value) / Double(time.timescale)
     }
     
     public func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
@@ -405,9 +370,7 @@ extension MetalCameraSession: AVCaptureVideoDataOutputSampleBufferDelegate {
             self.handleError(error)
         }
         catch {
-            /**
-             * We only throw `MetalCameraSessionError` errors.
-             */
+            // We only throw `MetalCameraSessionError` errors.
         }
     }
 
