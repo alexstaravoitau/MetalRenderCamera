@@ -56,6 +56,7 @@ public final class MetalCameraSession: NSObject {
     /// Requested capture device position, e.g. camera
     public let captureDevicePosition: AVCaptureDevice.Position
     
+    /// Requested capture device type
     public let captureDeviceType: AVCaptureDevice.DeviceType
     
     /// Delegate that will be notified about state changes and new frames
