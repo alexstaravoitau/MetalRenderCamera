@@ -14,7 +14,7 @@ internal final class CameraViewController: MTKViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        session = MetalCameraSession(delegate: self)
+        session = MetalCameraSession(frameRate: 30, delegate: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {

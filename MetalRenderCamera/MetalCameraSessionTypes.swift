@@ -52,6 +52,7 @@ public enum MetalCameraSessionError: Error {
     case requestedHardwareNotFound
     case inputDeviceNotAvailable
     case captureSessionRuntimeError
+    case frameRateNotSupported
     
     /**
      * Conversion errors
@@ -69,7 +70,7 @@ public enum MetalCameraSessionError: Error {
      */
     public func isStreamingError() -> Bool {
         switch self {
-        case .noHardwareAccess, .failedToAddCaptureInputDevice, .failedToAddCaptureOutput, .requestedHardwareNotFound, .inputDeviceNotAvailable, .captureSessionRuntimeError:
+        case .noHardwareAccess, .failedToAddCaptureInputDevice, .failedToAddCaptureOutput, .requestedHardwareNotFound, .inputDeviceNotAvailable, .captureSessionRuntimeError, .frameRateNotSupported:
             return true
         default:
             return false
@@ -100,6 +101,8 @@ public enum MetalCameraSessionError: Error {
             return "Failed to convert the frame to a Metal texture"
         case .failedToRetrieveTimestamp:
             return "Failed to retrieve timestamp from the sample buffer"
+        case .frameRateNotSupported:
+            return "Specified frame rate is not supported by the camera"
         }
     }
 }

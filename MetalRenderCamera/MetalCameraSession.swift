@@ -65,6 +65,8 @@ public final class MetalCameraSession: NSObject {
     /// Pixel format to be used for grabbing camera data and converting textures
     public let pixelFormat: MetalCameraPixelFormat
     
+    public let frameRate: Int32?
+    
     /**
      initialized a new instance, providing optional values.
      
@@ -73,12 +75,19 @@ public final class MetalCameraSession: NSObject {
      - parameter delegate:              Delegate. Defaults to `nil`.
      
      */
-    public init(pixelFormat: MetalCameraPixelFormat = .rgb, captureDevicePosition: AVCaptureDevice.Position = .back, captureDeviceType: AVCaptureDevice.DeviceType = .builtInWideAngleCamera, delegate: MetalCameraSessionDelegate? = nil) {
+    public init(
+        pixelFormat: MetalCameraPixelFormat = .rgb,
+        captureDevicePosition: AVCaptureDevice.Position = .back,
+        captureDeviceType: AVCaptureDevice.DeviceType = .builtInWideAngleCamera,
+        frameRate: Int32? = nil,
+        delegate: MetalCameraSessionDelegate? = nil
+    ) {
         self.pixelFormat = pixelFormat
         self.captureDevicePosition = captureDevicePosition
         self.captureDeviceType = captureDeviceType
+        self.frameRate = frameRate
         self.delegate = delegate
-        super.init();
+        super.init()
 
         NotificationCenter.default.addObserver(self, selector: #selector(captureSessionRuntimeError), name: NSNotification.Name.AVCaptureSessionRuntimeError, object: nil)
     }
@@ -232,8 +241,34 @@ public final class MetalCameraSession: NSObject {
 
         do {
             captureInput = try AVCaptureDeviceInput(device: inputDevice)
+            
+            try inputDevice.lockForConfiguration()
+            
+            if let frameRate {
+                var isFrameRateSupported = false
+                for format in inputDevice.formats {
+                    let ranges = format.videoSupportedFrameRateRanges
+                    for range in ranges {
+                        if range.minFrameRate...range.maxFrameRate ~= Double(frameRate) {
+                            inputDevice.activeFormat = format
+                            inputDevice.activeVideoMinFrameDuration = CMTime(value: 1, timescale: frameRate)
+                            inputDevice.activeVideoMaxFrameDuration = CMTime(value: 1, timescale: frameRate)
+                            isFrameRateSupported = true
+                            break
+                        }
+                    }
+                    if isFrameRateSupported { break }
+                }
+                if !isFrameRateSupported {
+                    inputDevice.unlockForConfiguration()
+                    throw MetalCameraSessionError.frameRateNotSupported
+                }
+            }
+            
+            inputDevice.unlockForConfiguration()
         }
         catch {
+            inputDevice.unlockForConfiguration()
             throw MetalCameraSessionError.inputDeviceNotAvailable
         }
         
